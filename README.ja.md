@@ -24,14 +24,12 @@
 
 ## インストール
 
-Roxyz0501が管理する共通Dalamudカスタムリポジトリからの配布を予定しています。
+Roxyz0501が管理する共通Dalamudカスタムリポジトリから配布しています。
 
-1. 最終URLの公開後、Dalamudのカスタムプラグインリポジトリへ `__SHARED_CUSTOM_REPOSITORY_URL__` を追加します。
+1. Dalamudのカスタムプラグインリポジトリへ `https://raw.githubusercontent.com/Roxyz0501/DalamudPluginRepo/main/repo.json` を追加します。
 2. Dalamudのプラグインインストーラーを開きます。
 3. **Aether Current Navigator**をインストールします。
 4. 下記の依存プラグインを導入して読み込みます。
-
-`__SHARED_CUSTOM_REPOSITORY_URL__` は未確定URLを示すプレースホルダーであり、そのままでは利用できません。
 
 ## 利用方法
 

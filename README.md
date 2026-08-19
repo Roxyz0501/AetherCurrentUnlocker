@@ -26,12 +26,10 @@ The plugin uses the game's normal Teleport, movement, mount, target, and interac
 
 The plugin is intended for the shared Roxyz0501 Dalamud custom repository.
 
-1. Add `__SHARED_CUSTOM_REPOSITORY_URL__` to Dalamud's custom plugin repositories after the final URL is published.
+1. Add `https://raw.githubusercontent.com/Roxyz0501/DalamudPluginRepo/main/repo.json` to Dalamud's custom plugin repositories.
 2. Open the Dalamud plugin installer.
 3. Install **Aether Current Navigator**.
 4. Install and load the dependencies listed below.
-
-`__SHARED_CUSTOM_REPOSITORY_URL__` is an explicit placeholder and must not be used as a live URL.
 
 ## Usage
 
@@ -110,7 +108,7 @@ The script generates `artifacts/AetherCurrentUnlocker-<AssemblyVersion>.zip`. Th
 - `AetherCurrentUnlocker.deps.json`
 - `AetherCurrentUnlocker.json`
 
-Publish the ZIP on this plugin's individual GitHub Releases page. The shared custom repository entry should reference that same asset. Repository, release, and icon URLs remain placeholders in `distribution/plugin-metadata.template.json` until the individual repository exists.
+The ZIP is published on this plugin's individual GitHub Releases page. The shared custom repository entry references that same asset. Repository, release, and icon URLs are recorded in `distribution/plugin-metadata.template.json`.
 
 ## Third-party reference and attribution
 

@@ -17,12 +17,11 @@ It is not a standalone `repo.json`.
   - `Questionable`: required when aether-current quests are enabled; optional for field-current-only use.
   - `TextAdvance` and `Lifestream`: indirect requirements of Questionable, not called directly by this plugin.
 
-## Values injected after the individual GitHub repository exists
+## Published values
 
-- `__PLUGIN_REPOSITORY_URL__`: the public URL of this plugin's individual source repository.
-- `__RELEASE_ZIP_URL__`: the direct GitHub Release asset URL for `AetherCurrentUnlocker-0.3.0.0.zip`.
-- `__PLUGIN_ICON_RAW_URL__`: a stable raw URL for `AetherCurrentUnlocker/images/icon.png`.
+- Source repository: `https://github.com/Roxyz0501/AetherCurrentUnlocker`
+- Release ZIP: `https://github.com/Roxyz0501/AetherCurrentUnlocker/releases/download/v0.3.0.0/AetherCurrentUnlocker-0.3.0.0.zip`
+- Icon: `https://raw.githubusercontent.com/Roxyz0501/AetherCurrentUnlocker/main/AetherCurrentUnlocker/images/icon.png`
 
-Use the same release asset URL for `DownloadLinkInstall` and `DownloadLinkUpdate`. Copy the object from
-`plugin-metadata.template.json` into the shared repository's JSON array after replacing every placeholder.
-Do not publish the template with unresolved placeholders as the live repository entry.
+Use the same release asset URL for `DownloadLinkInstall` and `DownloadLinkUpdate`. The published object is
+included in the shared repository's JSON array.

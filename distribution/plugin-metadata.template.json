@@ -13,8 +13,8 @@
     "automation",
     "utility"
   ],
-  "RepoUrl": "__PLUGIN_REPOSITORY_URL__",
-  "DownloadLinkInstall": "__RELEASE_ZIP_URL__",
-  "DownloadLinkUpdate": "__RELEASE_ZIP_URL__",
-  "IconUrl": "__PLUGIN_ICON_RAW_URL__"
+  "RepoUrl": "https://github.com/Roxyz0501/AetherCurrentUnlocker",
+  "DownloadLinkInstall": "https://github.com/Roxyz0501/AetherCurrentUnlocker/releases/download/v0.3.0.0/AetherCurrentUnlocker-0.3.0.0.zip",
+  "DownloadLinkUpdate": "https://github.com/Roxyz0501/AetherCurrentUnlocker/releases/download/v0.3.0.0/AetherCurrentUnlocker-0.3.0.0.zip",
+  "IconUrl": "https://raw.githubusercontent.com/Roxyz0501/AetherCurrentUnlocker/main/AetherCurrentUnlocker/images/icon.png"
 }
