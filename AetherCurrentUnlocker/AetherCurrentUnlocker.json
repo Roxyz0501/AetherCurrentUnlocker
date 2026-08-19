@@ -1,0 +1,10 @@
+{
+  "Author": "Roxyz0501",
+  "Name": "Aether Current Navigator",
+  "InternalName": "AetherCurrentUnlocker",
+  "Punchline": "Visualize and unlock Aether Currents across every expansion.",
+  "Description": "Shows field Aether Current and quest progress by expansion and area. It can process the current area or a selected expansion, using vnavmesh for field travel and Questionable for quests. Includes a map view, individual actions, route recalculation, and English/Japanese UI.\n\nCommand: /acnav",
+  "ApplicableVersion": "any",
+  "DalamudApiLevel": 15,
+  "Tags": ["aether-current", "quest", "automation", "utility"]
+}
