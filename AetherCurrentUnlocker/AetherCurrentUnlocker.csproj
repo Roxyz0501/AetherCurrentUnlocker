@@ -10,7 +10,9 @@
     <AssemblyName>AetherCurrentUnlocker</AssemblyName>
     <Authors>Roxyz0501</Authors>
     <PackageLicenseExpression>AGPL-3.0-only</PackageLicenseExpression>
-    <Version>0.3.0.0</Version>
+    <Version>0.3.1.0</Version>
+    <RepoUrl>https://github.com/Roxyz0501/AetherCurrentUnlocker</RepoUrl>
+    <IconUrl>https://raw.githubusercontent.com/Roxyz0501/AetherCurrentUnlocker/main/AetherCurrentUnlocker/images/icon.png</IconUrl>
     <Deterministic>true</Deterministic>
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
     <IsPackable>false</IsPackable>
