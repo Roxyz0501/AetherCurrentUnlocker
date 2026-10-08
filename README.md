@@ -18,7 +18,7 @@ A Dalamud API 15 plugin for viewing and processing field Aether Currents and Aet
 - Recalculates from the current position on request and switches to an unused aetheryte after detecting a stuck route. It stops after every candidate in the map has failed.
 - Uses the configured mount after teleport, retries mounting up to ten times without stopping navigation, and remounts after swimming when possible.
 - Hands accepted quest execution to Questionable through its public IPC interface.
-- Provides English and Japanese UI, statuses, errors, tooltips, dependency information, and support text.
+- Provides Japanese, English, German, French, Korean, Simplified Chinese, and Traditional Chinese UI, statuses, errors, tooltips, dependency information, and support text.
 
 The plugin uses the game's normal Teleport, movement, mount, target, and interaction actions. It does not alter coordinates or perform an artificial warp.
 
@@ -52,7 +52,9 @@ Open the window with `/acnav` or the Dalamud plugin-list button.
 
 Config contains processing targets, expansion confirmation, travel mount, debug display, and display language.
 
-On the first launch only, the plugin detects the Dalamud/game client language. A Japanese client selects and saves **日本語**; every other language or a failed detection selects and saves **English**. After this initialization, the saved choice is never replaced by automatic detection. The user can switch between **English** and **日本語**, and that explicit value remains in effect on later launches.
+On the first launch only, the plugin checks the game client language first and the public Dalamud UI language second, then saves a concrete language. Supported values are **日本語**, **English**, **Deutsch**, **Français**, **한국어**, **简体中文**, and **繁體中文**. Unknown, unavailable, or ambiguous `zh` values fall back to English. There is no Auto setting. After initialization, the saved choice is never replaced by automatic detection, and changing it in Config applies immediately and persists.
+
+FFXIV provides official Excel/game names in Japanese, English, German, and French. Korean, Simplified Chinese, and Traditional Chinese localize plugin-owned text but display game-derived area, quest, aetheryte, and mount names in English. The current public Dalamud SDK does not expose a launcher-language service used by this plugin, so the launcher step is omitted after checking the game and Dalamud UI languages.
 
 Processing and mount settings are stored per character using the game's content ID as the settings key. Display language is global to the plugin. The default travel mount is Mount Roulette; an unlocked mount can be selected instead.
 
@@ -88,7 +90,7 @@ The plugin does not permanently change dependency-plugin settings.
 - **Quest will not start:** confirm that Questionable and its dependencies are loaded, then read the quest status shown in the list.
 - **Repeated route failure:** press Recalculate route while moving. Automatic stuck recovery will then try unused aetherytes and stop if none succeeds.
 - **No map image:** the coordinate-grid fallback remains usable; enable debug information and review the map/aetheryte diagnostic text.
-- **Wrong UI language:** choose English or 日本語 in Config. Automatic detection runs only before the first language value is saved.
+- **Wrong UI language:** choose one of the seven languages in Config. Automatic detection runs only before the first valid language value is saved.
 
 ## Optional support
 

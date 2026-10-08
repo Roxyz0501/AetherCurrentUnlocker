@@ -99,30 +99,28 @@ internal sealed class MainWindow
         ImGui.SameLine();
         ImGui.TextDisabled($"— {automation.Status}");
         if (automation.IsRunning && automation.TotalTerritories > 0 && automation.ActiveTerritoryName != null)
-            ImGui.TextUnformatted(L.T($"Processing: {automation.ActiveTerritoryName}  ({automation.CompletedTerritories + 1}/{automation.TotalTerritories})",
-                $"処理中: {automation.ActiveTerritoryName}  ({automation.CompletedTerritories + 1}/{automation.TotalTerritories})"));
+            ImGui.TextUnformatted(L.F("ui.processing", automation.ActiveTerritoryName, automation.CompletedTerritories + 1, automation.TotalTerritories));
         if (automation.CurrentTarget != null && automation.AetheryteCandidateCount > 0)
         {
             string distance = automation.CurrentAetheryteHorizontalDistance is { } value ? $"{value:F0}m" : "—";
-            ImGui.TextDisabled(L.T(
-                $"Route candidate: {automation.CurrentAetheryteCandidate}/{automation.AetheryteCandidateCount}  {automation.CurrentAetheryteName}  horizontal distance {distance}",
-                $"経路候補: {automation.CurrentAetheryteCandidate}/{automation.AetheryteCandidateCount}  {automation.CurrentAetheryteName}  水平距離 {distance}"));
+            ImGui.TextDisabled(L.F("ui.routeCandidate", automation.CurrentAetheryteCandidate,
+                automation.AetheryteCandidateCount, automation.CurrentAetheryteName, distance));
         }
         if (!string.IsNullOrWhiteSpace(automation.LastIssue))
-            ImGui.TextColored(Yellow, L.T($"Latest notice: {automation.LastIssue}", $"直近の注意: {automation.LastIssue}"));
+            ImGui.TextColored(Yellow, L.F("ui.latestNotice", automation.LastIssue));
 
         ImGui.BeginDisabled(automation.IsRunning);
-        if (ImGui.Button(currentFieldButton, new Vector2(actionButtonWidth, 0)))
+        if (ImGui.Button($"{currentFieldButton}###UnlockCurrentArea", new Vector2(actionButtonWidth, 0)))
             automation.StartCurrentTerritory(Settings.IncludeFieldCurrents, Settings.IncludeQuestCurrents);
         ImGui.EndDisabled();
 
         ImGui.BeginDisabled(automation.IsRunning);
-        if (ImGui.Button(expansionButton, new Vector2(actionButtonWidth, 0)))
+        if (ImGui.Button($"{expansionButton}###UnlockExpansion", new Vector2(actionButtonWidth, 0)))
         {
             if (Settings.ConfirmExpansionRun)
             {
                 confirmExpansion = true;
-                ImGui.OpenPopup(L.T("Confirm expansion run", "拡張単位の実行確認"));
+                ImGui.OpenPopup($"{L.T("Confirm expansion run", "拡張単位の実行確認")}###ExpansionConfirm");
             }
             else
                 StartExpansion();
@@ -173,7 +171,7 @@ internal sealed class MainWindow
 
         ImGui.SameLine();
         ImGui.BeginDisabled(!automation.CanRecalculatePath);
-        if (ImGui.Button(L.T("Recalculate route", "通路を再計算")))
+        if (ImGui.Button($"{L.T("Recalculate route", "通路を再計算")}###RecalculateRoute"))
             automation.RecalculatePath();
         ImGui.EndDisabled();
         if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
@@ -186,22 +184,21 @@ internal sealed class MainWindow
                 ? L.T("Stuck detected. Automatically switching to an unused aetheryte.", "スタックを検知しました。未使用のエーテライトへ自動で切り替えます。")
                 : L.T("Automation will stop because every aetheryte departure route got stuck.", "すべてのエーテライト出発経路でスタックしたため、自動処理を停止します。"));
         if (automation.PathRecalculationCount > 0)
-            ImGui.TextUnformatted(L.T($"Route recalculations for this current: {automation.PathRecalculationCount}",
-                $"この風脈での通路再計算: {automation.PathRecalculationCount} 回"));
+            ImGui.TextUnformatted(L.F("ui.recalculations", automation.PathRecalculationCount));
     }
 
     private void DrawProgress()
     {
         if (ImGui.BeginTabBar("ProgressTabs"))
         {
-            if (ImGui.BeginTabItem(L.T("All expansions", "全拡張の進捗")))
+            if (ImGui.BeginTabItem($"{L.T("All expansions", "全拡張の進捗")}###AllExpansions"))
             {
                 foreach (uint expansionId in AetherCurrentDataService.ExpansionIds)
                     DrawExpansion(expansionId, L.Expansion(expansionId));
                 ImGui.EndTabItem();
             }
 
-            if (ImGui.BeginTabItem(L.T("Current area", "現在エリア")))
+            if (ImGui.BeginTabItem($"{L.T("Current area", "現在エリア")}###CurrentArea"))
             {
                 TerritoryProgress? territory = data.GetTerritory(clientState.TerritoryType);
                 if (territory == null)
@@ -211,13 +208,13 @@ internal sealed class MainWindow
                 ImGui.EndTabItem();
             }
 
-            if (ImGui.BeginTabItem(L.T("Aether Current map", "風脈マップ")))
+            if (ImGui.BeginTabItem($"{L.T("Aether Current map", "風脈マップ")}###AetherMap"))
             {
                 DrawAetherCurrentMap();
                 ImGui.EndTabItem();
             }
 
-            if (ImGui.BeginTabItem(L.T("Status", "状態")))
+            if (ImGui.BeginTabItem($"{L.T("Status", "状態")}###Status"))
             {
                 DrawPluginStatus();
                 ImGui.EndTabItem();
@@ -227,7 +224,7 @@ internal sealed class MainWindow
             ImGui.PushStyleColor(ImGuiCol.TabHovered, new Vector4(0.95f, 0.58f, 0.08f, 1f));
             ImGui.PushStyleColor(ImGuiCol.TabActive, new Vector4(0.82f, 0.47f, 0.05f, 1f));
             ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(1f, 0.95f, 0.82f, 1f));
-            bool supportOpen = ImGui.BeginTabItem(L.T("Support", "支援"));
+            bool supportOpen = ImGui.BeginTabItem($"{L.T("Support", "支援")}###Support");
             ImGui.PopStyleColor(4);
             if (supportOpen)
             {
@@ -235,7 +232,7 @@ internal sealed class MainWindow
                 ImGui.EndTabItem();
             }
 
-            if (ImGui.BeginTabItem(L.T("Config", "設定")))
+            if (ImGui.BeginTabItem($"{L.T("Config", "設定")}###Config"))
             {
                 DrawConfig();
                 ImGui.EndTabItem();
@@ -260,7 +257,10 @@ internal sealed class MainWindow
         ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0.78f, 0.39f, 0.05f, 1f));
         ImGui.PushStyleColor(ImGuiCol.ButtonHovered, new Vector4(0.95f, 0.52f, 0.08f, 1f));
         ImGui.PushStyleColor(ImGuiCol.ButtonActive, new Vector4(0.68f, 0.31f, 0.03f, 1f));
-        bool clicked = ImGui.Button(L.T("Support Roxyz0501 on Ko-fi", "Ko-fiでRoxyz0501を支援"), new Vector2(300, 46));
+        string supportLabel = L.T("Support Roxyz0501 on Ko-fi", "Ko-fiでRoxyz0501を支援");
+        float supportWidth = MathF.Min(ImGui.GetContentRegionAvail().X,
+            MathF.Max(300f, ImGui.CalcTextSize(supportLabel).X + ImGui.GetStyle().FramePadding.X * 4f));
+        bool clicked = ImGui.Button($"{supportLabel}###KoFiSupport", new Vector2(supportWidth, 46));
         ImGui.PopStyleColor(3);
         if (clicked)
             Util.OpenLink(supportUrl);
@@ -268,17 +268,17 @@ internal sealed class MainWindow
 
     private void DrawConfig()
     {
-        DisplayLanguage language = config.DisplayLanguage ?? DisplayLanguage.English;
-        string languageName = language == DisplayLanguage.Japanese ? "日本語" : "English";
+        string language = L.NormalizeLanguageCode(config.Language) ?? "en";
+        string languageName = L.LanguageName(language);
         ImGui.SetNextItemWidth(180);
-        if (ImGui.BeginCombo(L.T("Display language", "表示言語"), languageName))
+        if (ImGui.BeginCombo($"{L.T("Display language", "表示言語")}###DisplayLanguage", languageName))
         {
-            foreach (DisplayLanguage choice in new[] { DisplayLanguage.English, DisplayLanguage.Japanese })
+            foreach (string choice in L.SupportedCodes)
             {
-                string choiceName = choice == DisplayLanguage.Japanese ? "日本語" : "English";
+                string choiceName = L.LanguageName(choice);
                 if (!ImGui.Selectable(choiceName, language == choice))
                     continue;
-                config.DisplayLanguage = choice;
+                config.Language = choice;
                 questStatusCache.Clear();
                 aetheryteMapCache.Clear();
                 mountCache = default;
@@ -293,25 +293,25 @@ internal sealed class MainWindow
 
         CharacterConfiguration settings = Settings;
         string characterName = playerState.IsLoaded ? playerState.CharacterName.ToString() : L.T("logged-in character", "ログイン中のキャラクター");
-        ImGui.TextDisabled(L.T($"Per-character settings — {characterName}", $"キャラクター別設定 — {characterName}"));
+        ImGui.TextDisabled(L.F("ui.characterSettings", characterName));
 
         ImGui.TextUnformatted(L.T("Targets", "処理対象"));
         bool fields = settings.IncludeFieldCurrents;
-        if (ImGui.Checkbox(L.T("Field Aether Currents", "フィールド風脈"), ref fields))
+        if (ImGui.Checkbox($"{L.T("Field Aether Currents", "フィールド風脈")}###IncludeFields", ref fields))
         {
             settings.IncludeFieldCurrents = fields;
             save();
         }
         ImGui.SameLine();
         bool quests = settings.IncludeQuestCurrents;
-        if (ImGui.Checkbox(L.T("Aether Current quests", "風脈クエスト"), ref quests))
+        if (ImGui.Checkbox($"{L.T("Aether Current quests", "風脈クエスト")}###IncludeQuests", ref quests))
         {
             settings.IncludeQuestCurrents = quests;
             save();
         }
 
         bool confirm = settings.ConfirmExpansionRun;
-        if (ImGui.Checkbox(L.T("Confirm before running an expansion", "拡張単位の開始前に確認する"), ref confirm))
+        if (ImGui.Checkbox($"{L.T("Confirm before running an expansion", "拡張単位の開始前に確認する")}###ConfirmExpansion", ref confirm))
         {
             settings.ConfirmExpansionRun = confirm;
             save();
@@ -320,7 +320,7 @@ internal sealed class MainWindow
         DrawMountSelector(settings);
 
         bool debug = settings.ShowDebugInformation;
-        if (ImGui.Checkbox(L.T("Show debug information", "デバッグ情報の表示"), ref debug))
+        if (ImGui.Checkbox($"{L.T("Show debug information", "デバッグ情報の表示")}###ShowDebug", ref debug))
         {
             settings.ShowDebugInformation = debug;
             save();
@@ -351,9 +351,9 @@ internal sealed class MainWindow
                 ImGuiTableFlags.BordersInnerH | ImGuiTableFlags.RowBg | ImGuiTableFlags.SizingStretchProp))
             return;
 
-        ImGui.TableSetupColumn(L.T("Plugin", "プラグイン"), ImGuiTableColumnFlags.WidthFixed, 170);
-        ImGui.TableSetupColumn(L.T("Status", "状態"), ImGuiTableColumnFlags.WidthFixed, 130);
-        ImGui.TableSetupColumn(L.T("Role", "用途"));
+        ImGui.TableSetupColumn(L.T("Plugin", "プラグイン"), ImGuiTableColumnFlags.WidthFixed, 150);
+        ImGui.TableSetupColumn(L.T("Status", "状態"), ImGuiTableColumnFlags.WidthFixed, 160);
+        ImGui.TableSetupColumn(L.T("Role", "用途"), ImGuiTableColumnFlags.WidthStretch);
         ImGui.TableHeadersRow();
         DrawDependencyRow("vnavmesh", vnav.Available,
             vnav.Available ? vnav.Ready ? L.T("● Ready", "● 使用可能") : L.T("● Loaded", "● 読み込み済み") : L.T("● Not loaded", "● 未読み込み"),
@@ -384,7 +384,7 @@ internal sealed class MainWindow
             ? L.T("Mount Roulette", "マウント・ルーレット")
             : mounts.FirstOrDefault(x => x.MountId == settings.MountId)?.Name ?? $"Mount {settings.MountId}";
         ImGui.SetNextItemWidth(360);
-        if (!ImGui.BeginCombo(L.T("Mount used for travel", "移動時に使用するマウント"), selectedName))
+        if (!ImGui.BeginCombo($"{L.T("Mount used for travel", "移動時に使用するマウント")}###TravelMount", selectedName))
             return;
 
         if (ImGui.Selectable(L.T("Mount Roulette", "マウント・ルーレット"), settings.MountId == 0))
@@ -444,7 +444,7 @@ internal sealed class MainWindow
         TerritoryProgress? selected = data.GetTerritory(mapTerritoryId);
         string selectedName = selected?.Name ?? L.T("Select an area", "エリアを選択");
         ImGui.SetNextItemWidth(300);
-        if (ImGui.BeginCombo(L.T("Displayed area", "表示エリア"), selectedName))
+        if (ImGui.BeginCombo($"{L.T("Displayed area", "表示エリア")}###DisplayedArea", selectedName))
         {
             foreach (IGrouping<uint, TerritoryProgress> expansion in all.GroupBy(x => x.ExpansionId))
             {
@@ -463,7 +463,7 @@ internal sealed class MainWindow
         if (currentTerritory != null)
         {
             ImGui.SameLine();
-            if (ImGui.Button(L.T("Current area", "現在エリア")))
+            if (ImGui.Button($"{L.T("Current area", "現在エリア")}###MapCurrentArea"))
                 mapTerritoryId = currentTerritory.TerritoryId;
         }
 
@@ -538,9 +538,9 @@ internal sealed class MainWindow
             if (Vector2.Distance(mouse, point) <= 12f)
             {
                 ImGui.BeginTooltip();
-                ImGui.TextUnformatted(L.T($"#{i + 1} Aether Current {field.CurrentId}", $"#{i + 1} 風脈 {field.CurrentId}"));
+                ImGui.TextUnformatted(L.F("ui.currentTooltip", i + 1, field.CurrentId));
                 ImGui.TextUnformatted(unlocked ? L.T("Unlocked", "解放済み") : isTarget ? L.T("Current travel target", "現在の移動対象") : L.T("Locked", "未解放"));
-                ImGui.TextUnformatted(L.T($"Map coordinates X:{mapCoordinate.X:F1} Y:{mapCoordinate.Y:F1}", $"マップ座標 X:{mapCoordinate.X:F1} Y:{mapCoordinate.Y:F1}"));
+                ImGui.TextUnformatted(L.F("ui.mapCoordinates", mapCoordinate.X, mapCoordinate.Y));
                 ImGui.EndTooltip();
             }
         }
@@ -574,12 +574,12 @@ internal sealed class MainWindow
             if (Vector2.Distance(mouse, point) <= 13f)
             {
                 ImGui.BeginTooltip();
-                ImGui.TextUnformatted(L.T($"Aetheryte candidate: {destination.Name}", $"エーテライト候補: {destination.Name}"));
+                ImGui.TextUnformatted(L.F("ui.aetheryteCandidate", destination.Name));
                 if (selectedForTravel)
                     ImGui.TextColored(new Vector4(0.75f, 0.45f, 1f, 1f), L.T("Current teleport candidate", "現在のテレポ候補"));
                 ImGui.TextUnformatted($"ID: {destination.AetheryteId}  SubIndex: {destination.SubIndex}");
-                ImGui.TextUnformatted(L.T($"World coordinates X:{destination.Position.X:F1} Y:{destination.Position.Y:F1} Z:{destination.Position.Z:F1}", $"ワールド座標 X:{destination.Position.X:F1} Y:{destination.Position.Y:F1} Z:{destination.Position.Z:F1}"));
-                ImGui.TextUnformatted(L.T($"Map coordinates X:{mapCoordinate.X:F1} Y:{mapCoordinate.Y:F1}", $"マップ座標 X:{mapCoordinate.X:F1} Y:{mapCoordinate.Y:F1}"));
+                ImGui.TextUnformatted(L.F("ui.worldCoordinates", destination.Position.X, destination.Position.Y, destination.Position.Z));
+                ImGui.TextUnformatted(L.F("ui.mapCoordinates", mapCoordinate.X, mapCoordinate.Y));
                 ImGui.EndTooltip();
             }
         }
@@ -594,7 +594,7 @@ internal sealed class MainWindow
         if (unlockedAetherytes.Count == 0)
             ImGui.TextColored(Yellow, L.T("Could not obtain normal aetheryte coordinates for this area.", "このエリアの通常エーテライト座標を取得できませんでした。"));
         if (Settings.ShowDebugInformation)
-            ImGui.TextDisabled(L.T($"Aetheryte diagnostics: {data.LastAetheryteScanStatus}", $"エーテライト取得診断: {data.LastAetheryteScanStatus}"));
+            ImGui.TextDisabled(L.F("ui.aetheryteDiagnostics", data.LastAetheryteScanStatus));
         if (mapInfo.TexturePath == null)
             ImGui.TextColored(Yellow, L.T("The game map image was not found; using the fallback display.", "ゲーム内マップ画像が見つからないため、フォールバック表示を使用しています。"));
         ImGui.TextWrapped(L.T("Hover a number to view its Aether Current ID, unlock state, and in-game map coordinates.", "番号にマウスを合わせると風脈ID・解放状態・ゲーム内マップ座標を表示します。"));
@@ -692,8 +692,8 @@ internal sealed class MainWindow
             return false;
 
         ImGui.TableSetupColumn("Title", ImGuiTableColumnFlags.WidthStretch);
-        ImGui.TableSetupColumn("Field", ImGuiTableColumnFlags.WidthFixed, 135);
-        ImGui.TableSetupColumn("Quest", ImGuiTableColumnFlags.WidthFixed, 135);
+        ImGui.TableSetupColumn("Field", ImGuiTableColumnFlags.WidthFixed, 175);
+        ImGui.TableSetupColumn("Quest", ImGuiTableColumnFlags.WidthFixed, 175);
         ImGui.TableNextRow();
         ImGui.TableSetColumnIndex(0);
         if (selected)
@@ -711,21 +711,21 @@ internal sealed class MainWindow
     {
         if (!confirmExpansion)
             return;
-        if (!ImGui.BeginPopupModal(L.T("Confirm expansion run", "拡張単位の実行確認"), ref confirmExpansion, ImGuiWindowFlags.AlwaysAutoResize))
+        if (!ImGui.BeginPopupModal($"{L.T("Confirm expansion run", "拡張単位の実行確認")}###ExpansionConfirm", ref confirmExpansion, ImGuiWindowFlags.AlwaysAutoResize))
             return;
 
         string expansion = L.Expansion(Settings.SelectedExpansion);
-        ImGui.TextWrapped(L.T(
-            $"Process locked Aether Currents in “{expansion}” in sequence. Normal teleport fees apply, and Questionable runs each Aether Current quest individually.",
-            $"「{expansion}」の未解放風脈を順番に処理します。通常テレポ代が発生し、風脈クエストではQuestionableが各クエストを単独実行します。"));
-        if (ImGui.Button(L.T("Start", "開始する")))
+        ImGui.PushTextWrapPos(ImGui.GetCursorPosX() + 520f * ImGuiHelpers.GlobalScale);
+        ImGui.TextWrapped(L.F("ui.confirmExpansion", expansion));
+        ImGui.PopTextWrapPos();
+        if (ImGui.Button($"{L.T("Start", "開始する")}###StartExpansion"))
         {
             StartExpansion();
             confirmExpansion = false;
             ImGui.CloseCurrentPopup();
         }
         ImGui.SameLine();
-        if (ImGui.Button(L.T("Cancel", "キャンセル")))
+        if (ImGui.Button($"{L.T("Cancel", "キャンセル")}###CancelExpansion"))
         {
             confirmExpansion = false;
             ImGui.CloseCurrentPopup();

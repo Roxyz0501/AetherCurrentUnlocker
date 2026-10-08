@@ -311,8 +311,7 @@ internal sealed class AutomationController : IDisposable
             if (territoryQueue.Count == 0)
             {
                 string suffix = blockedCurrents.Count + blockedQuests.Count > 0
-                    ? L.T($" ({blockedCurrents.Count + blockedQuests.Count} unavailable; review the details)",
-                        $"（実行不能 {blockedCurrents.Count + blockedQuests.Count} 件。詳細を確認してください）")
+                    ? L.F("auto.unavailableSuffix", blockedCurrents.Count + blockedQuests.Count)
                     : string.Empty;
                 Mode = AutomationMode.None;
                 SetPhase(AutomationPhase.Completed, L.T("Finished processing the selected scope", "対象範囲の処理が完了しました") + suffix);
@@ -320,9 +319,7 @@ internal sealed class AutomationController : IDisposable
             }
 
             activeTerritory = territoryQueue.Dequeue();
-            SetPhase(AutomationPhase.Selecting, L.T(
-                $"Area {completedTerritories + 1}/{totalTerritories}: checking Aether Currents in {activeTerritory.Name}",
-                $"エリア {completedTerritories + 1}/{totalTerritories}: {activeTerritory.Name} の風脈を確認中"));
+            SetPhase(AutomationPhase.Selecting, L.F("auto.checkingArea", completedTerritories + 1, totalTerritories, activeTerritory.Name));
         }
 
         List<FieldCurrent> pendingFields = includeFields
@@ -379,9 +376,7 @@ internal sealed class AutomationController : IDisposable
                 current = nearby.Field;
                 questAwaitingStart = null;
                 PrepareNewTravelTarget();
-                SetPhase(AutomationPhase.Waiting, L.T(
-                    $"Nearest target selected: preparing field Aether Current {current.CurrentId}",
-                    $"近い対象を選択: フィールド風脈 {current.CurrentId} を準備中"));
+                SetPhase(AutomationPhase.Waiting, L.F("auto.prepareCurrent", current.CurrentId));
                 return;
             }
 
@@ -393,9 +388,7 @@ internal sealed class AutomationController : IDisposable
                 // CurrentId/DataId=0 はクエスト発行地点への移動専用ターゲット。
                 current = new(activeTerritory.TerritoryId, 0, 0, questStart.Value);
                 PrepareNewTravelTarget();
-                SetPhase(AutomationPhase.Waiting, L.T(
-                    $"Nearest target selected: preparing travel to the issuer of “{data.GetQuestName(id)}”",
-                    $"近い対象を選択: 「{data.GetQuestName(id)}」の受注地点へ移動準備中"));
+                SetPhase(AutomationPhase.Waiting, L.F("auto.prepareQuest", data.GetQuestName(id)));
                 return;
             }
 
@@ -404,16 +397,13 @@ internal sealed class AutomationController : IDisposable
                 return;
             }
             blockedQuests.Add(id);
-            LastIssue = L.T($"Questionable refused to start “{data.GetQuestName(id)}”.",
-                $"Questionableが「{data.GetQuestName(id)}」の開始を拒否しました。");
+            LastIssue = L.F("auto.questRefused", data.GetQuestName(id));
         }
 
         string completedName = activeTerritory.Name;
         activeTerritory = null;
         completedTerritories++;
-        SetPhase(AutomationPhase.Selecting, L.T(
-            $"Finished {completedName}. Moving to the next area ({completedTerritories}/{totalTerritories})",
-            $"{completedName} の処理が完了しました。次のエリアへ進みます（{completedTerritories}/{totalTerritories}）"));
+        SetPhase(AutomationPhase.Selecting, L.F("auto.areaFinished", completedName, completedTerritories, totalTerritories));
     }
 
     private void TickQuest()
@@ -421,8 +411,7 @@ internal sealed class AutomationController : IDisposable
         ushort id = questId!.Value;
         if (questionable.IsRunning)
         {
-            SetPhase(AutomationPhase.RunningQuest, L.T($"Running “{data.GetQuestName(id)}” with Questionable",
-                $"Questionableで「{data.GetQuestName(id)}」を進行中"));
+            SetPhase(AutomationPhase.RunningQuest, L.F("auto.runningQuest", data.GetQuestName(id)));
             return;
         }
 
@@ -431,8 +420,7 @@ internal sealed class AutomationController : IDisposable
         if (!data.IsQuestComplete(id))
         {
             blockedQuests.Add(id);
-            LastIssue = L.T($"“{data.GetQuestName(id)}” stopped before completion.",
-                $"「{data.GetQuestName(id)}」は完了前に停止しました。");
+            LastIssue = L.F("auto.questStopped", data.GetQuestName(id));
         }
         SetPhase(AutomationPhase.Selecting, L.T("Selecting the next target", "次の対象を選択中"));
     }
@@ -443,8 +431,7 @@ internal sealed class AutomationController : IDisposable
             return false;
         questId = id;
         ownsQuestionable = true;
-        SetPhase(AutomationPhase.RunningQuest, L.T($"Running “{data.GetQuestName(id)}” with Questionable",
-            $"Questionableで「{data.GetQuestName(id)}」を進行中"));
+        SetPhase(AutomationPhase.RunningQuest, L.F("auto.runningQuest", data.GetQuestName(id)));
         return true;
     }
 
@@ -475,16 +462,12 @@ internal sealed class AutomationController : IDisposable
                 {
                     departurePlanTask = StartDeparturePlanning(objects.LocalPlayer!.Position, target.Position,
                         aetheryteCandidates, conditions[ConditionFlag.Swimming]);
-                    Status = L.T(
-                        $"Comparing ground-route distances from the current location and all {aetheryteCandidates.Count} aetheryte candidates",
-                        $"現在地点と全エーテライト候補の地上経路距離を比較中（全{aetheryteCandidates.Count}候補）");
+                    Status = L.F("auto.comparingRoutes", aetheryteCandidates.Count);
                     return;
                 }
                 if (!departurePlanTask.IsCompleted)
                 {
-                    Status = L.T(
-                        $"Comparing ground-route distances from the current location and all {aetheryteCandidates.Count} aetheryte candidates",
-                        $"現在地点と全エーテライト候補の地上経路距離を比較中（全{aetheryteCandidates.Count}候補）");
+                    Status = L.F("auto.comparingRoutes", aetheryteCandidates.Count);
                     return;
                 }
 
@@ -513,16 +496,14 @@ internal sealed class AutomationController : IDisposable
                     aetheryteCandidateIndex = -1;
                     preparedGroundPath = plan.Route.Waypoints;
                     targetTeleportHandled = true;
-                    Status = L.T($"Using the ground route from the current location ({plan.Route.Length:F0}m, no flying)",
-                        $"現在地点からの地上経路を採用（{plan.Route.Length:F0}m、飛行なし）");
+                    Status = L.F("auto.currentGroundRoute", plan.Route.Length);
                     return;
                 }
 
                 aetheryteCandidateIndex = plan.AetheryteIndex;
                 forcedTeleportDestination = aetheryteCandidates[plan.AetheryteIndex];
-                Status = L.T(
-                    $"Using a reachable ground route from “{forcedTeleportDestination.Name}” ({plan.Route.Length:F0}m, candidate {plan.AetheryteIndex + 1}/{aetheryteCandidates.Count})",
-                    $"到達可能な「{forcedTeleportDestination.Name}」からの地上経路を採用（{plan.Route.Length:F0}m、候補 {plan.AetheryteIndex + 1}/{aetheryteCandidates.Count}）");
+                Status = L.F("auto.aetheryteGroundRoute", forcedTeleportDestination.Name, plan.Route.Length,
+                    plan.AetheryteIndex + 1, aetheryteCandidates.Count);
             }
             TeleportDestination? destination = forcedTeleportDestination
                                                ?? aetheryteCandidates.ElementAtOrDefault(aetheryteCandidateIndex);
@@ -530,8 +511,7 @@ internal sealed class AutomationController : IDisposable
             {
                 if (clientState.TerritoryType != target.TerritoryId)
                 {
-                    LastIssue = L.T($"Could not obtain normal aetheryte coordinates for territory {target.TerritoryId}.",
-                        $"対象エリア {target.TerritoryId} の通常エーテライト座標を取得できませんでした。");
+                    LastIssue = L.F("auto.noAetheryteCoordinates", target.TerritoryId);
                     Stop(L.T("Stopped because aetheryte coordinates could not be obtained", "エーテライト座標を取得できないため停止しました"));
                 }
                 else
@@ -549,8 +529,7 @@ internal sealed class AutomationController : IDisposable
                 if (alreadyAtNearest)
                 {
                     targetTeleportHandled = true;
-                    Status = L.T($"Traveling from the nearest aetheryte, “{destination.Name}”",
-                        $"最寄りの「{destination.Name}」付近から向かいます");
+                    Status = L.F("auto.fromNearestAetheryte", destination.Name);
                     return;
                 }
             }
@@ -575,14 +554,13 @@ internal sealed class AutomationController : IDisposable
                 // 同一エリアテレポではTerritoryIdが変化しない。詠唱・ロードが落ち着く前に
                 // マウントルーレットを実行しないよう、最低待機時間も設ける。
                 teleportMovementReleaseAt = DateTime.UtcNow.AddSeconds(10);
-                SetPhase(AutomationPhase.Teleporting, L.T(
-                    $"Candidate {aetheryteCandidateIndex + 1}/{aetheryteCandidates.Count}: teleporting to “{destination.Name}”",
-                    $"候補 {aetheryteCandidateIndex + 1}/{aetheryteCandidates.Count}: 「{destination.Name}」へ通常テレポ中"));
+                SetPhase(AutomationPhase.Teleporting, L.F("auto.teleportingCandidate", aetheryteCandidateIndex + 1,
+                    aetheryteCandidates.Count, destination.Name));
                 nextActionAt = teleportMovementReleaseAt;
             }
             else
             {
-                LastIssue = L.T($"Failed to start Teleport to “{destination.Name}”.", $"「{destination.Name}」への通常テレポ開始に失敗しました。");
+                LastIssue = L.F("auto.teleportFailed", destination.Name);
                 Stop(L.T("Stopped because Teleport failed", "通常テレポに失敗したため停止しました"));
             }
             return;
@@ -592,9 +570,7 @@ internal sealed class AutomationController : IDisposable
         {
             if (DateTime.UtcNow >= teleportArrivalDeadline)
             {
-                LastIssue = L.T(
-                    $"Teleport to “{pendingTeleportArrival.Name}” started, but arrival could not be confirmed by coordinates within 45 seconds.",
-                    $"「{pendingTeleportArrival.Name}」への通常テレポを開始しましたが、45秒以内に到着を座標確認できませんでした。");
+                LastIssue = L.F("auto.teleportArrivalTimeout", pendingTeleportArrival.Name);
                 Stop(L.T("Stopped because Teleport did not complete", "通常テレポが完了しなかったため停止しました"));
                 return;
             }
@@ -607,7 +583,7 @@ internal sealed class AutomationController : IDisposable
             if (!inDestinationTerritory || arrivalDistance > 35f || !settled)
             {
                 Status = settled
-                    ? L.T($"Waiting to confirm Teleport arrival ({arrivalDistance:F0}m from aetheryte)", $"通常テレポの到着確認待ち（エーテライトまで {arrivalDistance:F0}m）")
+                    ? L.F("auto.waitingArrival", arrivalDistance)
                     : L.T("Waiting for Teleport cast/loading to finish (mount actions suppressed)", "通常テレポの詠唱・ロード完了待ち（マウント操作を抑止中）");
                 return;
             }
@@ -675,9 +651,7 @@ internal sealed class AutomationController : IDisposable
             {
                 if (TryMoveToNextAetheryte(target))
                     return;
-                LastIssue = L.T(
-                    $"{activeTerritory?.Name ?? target.TerritoryId.ToString()}: stuck on routes from every aetheryte in the map.",
-                    $"{activeTerritory?.Name ?? target.TerritoryId.ToString()}: マップ内のすべてのエーテライト出発経路でスタックしました。");
+                LastIssue = L.F("auto.allRoutesStuck", activeTerritory?.Name ?? target.TerritoryId.ToString());
                 Stop(L.T("Stopped after getting stuck on routes from every aetheryte", "全エーテライトからの経路でスタックしたため停止しました"));
                 return;
             }
@@ -700,9 +674,7 @@ internal sealed class AutomationController : IDisposable
                         ownsMovement = true;
                         lastMovementProgressAt = DateTime.UtcNow;
                         lastMovementProgressPosition = playerPosition;
-                        SetPhase(AutomationPhase.Moving, L.T(
-                            $"Following a verified ground route to the Aether Current ({distance:F0}m remaining, no flying)",
-                            $"風脈まで検証済み地上経路で移動中（残り {distance:F0}m、飛行なし）"));
+                        SetPhase(AutomationPhase.Moving, L.F("auto.verifiedGroundRoute", distance));
                         nextActionAt = DateTime.UtcNow.AddSeconds(2);
                         return;
                     }
@@ -735,9 +707,7 @@ internal sealed class AutomationController : IDisposable
                     string route = recoveryWaypoint.HasValue
                         ? L.T("ground detour", "地上迂回経路")
                         : L.T("walking/ground-mount route", "徒歩・地上マウント経路");
-                    SetPhase(AutomationPhase.Moving, L.T(
-                        $"Following the {route} to the Aether Current ({distance:F0}m remaining, no flying)",
-                        $"風脈まで{route}で移動中（残り {distance:F0}m、飛行なし）"));
+                    SetPhase(AutomationPhase.Moving, L.F("auto.followingRoute", route, distance));
                 }
                 else
                 {
@@ -754,8 +724,7 @@ internal sealed class AutomationController : IDisposable
                 string warning = IsPossiblyStuck
                     ? L.T(" — possibly stuck; recalculate the route", " — スタックの可能性あり。通路を再計算してください")
                     : string.Empty;
-                Status = L.T($"Traveling normally to the Aether Current ({distance:F0}m remaining){warning}",
-                    $"風脈まで正規移動中（残り {distance:F0}m）{warning}");
+                Status = L.F("auto.normalTravel", distance, warning);
             }
             return;
         }
@@ -774,8 +743,7 @@ internal sealed class AutomationController : IDisposable
             if (!StartQuestionableQuest(id))
             {
                 blockedQuests.Add(id);
-                LastIssue = L.T($"Questionable refused to start “{data.GetQuestName(id)}”.",
-                    $"Questionableが「{data.GetQuestName(id)}」の開始を拒否しました。");
+                LastIssue = L.F("auto.questRefused", data.GetQuestName(id));
                 SetPhase(AutomationPhase.Selecting, L.T("Selecting the next target", "次の対象を選択中"));
             }
             return;
@@ -811,8 +779,7 @@ internal sealed class AutomationController : IDisposable
         }
         StopOwnedMovement();
         blockedCurrents.Add(target.CurrentId);
-        LastIssue = L.T($"Aether Current {target.CurrentId} (territory {target.TerritoryId}): {reason}",
-            $"風脈 {target.CurrentId}（エリア {target.TerritoryId}）: {reason}");
+        LastIssue = L.F("auto.currentIssue", target.CurrentId, target.TerritoryId, reason);
         current = null;
         SetPhase(AutomationPhase.Selecting, L.T("Selecting the next target", "次の対象を選択中"));
     }
@@ -825,7 +792,7 @@ internal sealed class AutomationController : IDisposable
         questAwaitingStart = null;
         ResetAetheryteRouting();
         ResetPathRecovery();
-        LastIssue = L.T($"“{data.GetQuestName(id)}”: {reason}", $"「{data.GetQuestName(id)}」: {reason}");
+        LastIssue = L.F("auto.questIssue", data.GetQuestName(id), reason);
         if (!StartQuestionableQuest(id))
         {
             blockedQuests.Add(id);
@@ -870,9 +837,7 @@ internal sealed class AutomationController : IDisposable
         lastMovementProgressPosition = player;
         IsPossiblyStuck = false;
         nextActionAt = DateTime.UtcNow.AddMilliseconds(500);
-        SetPhase(AutomationPhase.Waiting, L.T(
-            $"Recalculating the route from the current location (attempt {pathRecalculationCount})",
-            $"現在地点から通路を再計算します（{pathRecalculationCount}回目）"));
+        SetPhase(AutomationPhase.Waiting, L.F("auto.recalculating", pathRecalculationCount));
         log.Information("Recalculating ground path from {Player} to aether current {CurrentId}; attempt {Attempt}",
             player, current.CurrentId, pathRecalculationCount);
         return true;
@@ -1084,9 +1049,8 @@ internal sealed class AutomationController : IDisposable
         string fallbackReason = reason ?? L.T(
             "Stuck detected; switching to an unused aetheryte",
             "スタックを検知したため未使用のエーテライトへ切り替えます");
-        Status = L.T(
-            $"{fallbackReason}: retrying from “{forcedTeleportDestination.Name}” ({nextIndex + 1}/{aetheryteCandidates.Count})",
-            $"{fallbackReason}: 「{forcedTeleportDestination.Name}」から再試行（{nextIndex + 1}/{aetheryteCandidates.Count}）");
+        Status = L.F("auto.retrying", fallbackReason, forcedTeleportDestination.Name,
+            nextIndex + 1, aetheryteCandidates.Count);
         log.Warning("Stuck while moving to aether current {CurrentId}; retrying from aetheryte {AetheryteId} ({Index}/{Count})",
             target.CurrentId, forcedTeleportDestination.AetheryteId, nextIndex + 1, aetheryteCandidates.Count);
         return true;
@@ -1176,7 +1140,7 @@ internal sealed class AutomationController : IDisposable
         uint actionId = mountId == 0 ? 9u : mountId;
         string mountName = mountId == 0
             ? L.T("Mount Roulette", "マウント・ルーレット")
-            : L.T($"selected mount (ID {mountId})", $"指定マウント（ID {mountId}）");
+            : L.F("auto.selectedMount", mountId);
         mountAttemptCount++;
         uint actionStatus = actionManager->GetActionStatus(actionType, actionId);
         if (actionStatus != 0)

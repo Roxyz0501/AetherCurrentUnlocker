@@ -41,6 +41,8 @@ internal sealed class AetherCurrentDataService
     private readonly IReadOnlyDictionary<uint, TerritoryProgress> territories;
     private readonly IReadOnlyDictionary<ushort, string> questNamesEnglish;
     private readonly IReadOnlyDictionary<ushort, string> questNamesJapanese;
+    private readonly IReadOnlyDictionary<ushort, string> questNamesGerman;
+    private readonly IReadOnlyDictionary<ushort, string> questNamesFrench;
     private readonly IReadOnlyDictionary<ushort, (uint TerritoryId, System.Numerics.Vector3 Position)> questStartPositions;
     private readonly IReadOnlySet<uint> mountTerritories;
     public string LastAetheryteScanStatus { get; private set; } = L.T("Not scanned", "未走査");
@@ -55,6 +57,8 @@ internal sealed class AetherCurrentDataService
             .ToHashSet();
         (questNamesEnglish, questStartPositions) = BuildQuestMetadata(ClientLanguage.English);
         (questNamesJapanese, _) = BuildQuestMetadata(ClientLanguage.Japanese);
+        (questNamesGerman, _) = BuildQuestMetadata(ClientLanguage.German);
+        (questNamesFrench, _) = BuildQuestMetadata(ClientLanguage.French);
         territories = BuildTerritories();
     }
 
@@ -63,8 +67,14 @@ internal sealed class AetherCurrentDataService
     public TerritoryProgress? GetTerritory(uint territoryId) => territories.GetValueOrDefault(territoryId);
     public string GetQuestName(ushort questId)
     {
-        IReadOnlyDictionary<ushort, string> names = L.IsJapanese ? questNamesJapanese : questNamesEnglish;
-        return names.GetValueOrDefault(questId, L.T($"Quest {questId}", $"クエスト {questId}"));
+        IReadOnlyDictionary<ushort, string> names = L.Code switch
+        {
+            "ja" => questNamesJapanese,
+            "de" => questNamesGerman,
+            "fr" => questNamesFrench,
+            _ => questNamesEnglish,
+        };
+        return names.GetValueOrDefault(questId, L.F("dynamic.quest", questId));
     }
     public System.Numerics.Vector3? GetQuestStartPosition(ushort questId, uint territoryId) =>
         questStartPositions.TryGetValue(questId, out var start) && start.TerritoryId == territoryId
@@ -162,16 +172,13 @@ internal sealed class AetherCurrentDataService
             var matchingEntry = listEntries.FirstOrDefault(x => x.AetheryteId == aetheryte.RowId);
             byte subIndex = matchingEntry?.SubIndex ?? 0;
             string name = aetheryte.PlaceName.ValueNullable?.Name.ToString()
-                          ?? L.T($"Aetheryte {aetheryte.RowId}", $"エーテライト {aetheryte.RowId}");
+                          ?? L.F("dynamic.aetheryte", aetheryte.RowId);
             AddDestination(new(aetheryte.RowId, subIndex, name, position));
         }
 
         int bakedCount = AetheryteCatalog.Get(territoryId).Count;
-        LastAetheryteScanStatus = L.T(
-            $"Territory {territoryId}: Dalamud list {aetheryteList.Length} / territory matches {listEntries.Count} / " +
-            $"bundled coordinates {bakedCount} / normal Excel entries {normalInTerritory} / Excel coordinates {coordinateCount}",
-            $"Territory {territoryId}: Dalamud一覧 {aetheryteList.Length}件 / エリア一致 {listEntries.Count}件 / " +
-            $"同梱座標 {bakedCount}件 / Excel通常 {normalInTerritory}件 / Excel座標 {coordinateCount}件");
+        LastAetheryteScanStatus = L.F("data.aetheryteScan", territoryId, aetheryteList.Length,
+            listEntries.Count, bakedCount, normalInTerritory, coordinateCount);
 
         return destinations
             .GroupBy(x => (x.Destination.AetheryteId, x.Destination.SubIndex))
@@ -197,12 +204,16 @@ internal sealed class AetherCurrentDataService
         Dictionary<uint, TerritoryProgress> result = [];
         var territorySheetEnglish = data.GetExcelSheet<TerritoryType>(ClientLanguage.English);
         var territorySheetJapanese = data.GetExcelSheet<TerritoryType>(ClientLanguage.Japanese);
+        var territorySheetGerman = data.GetExcelSheet<TerritoryType>(ClientLanguage.German);
+        var territorySheetFrench = data.GetExcelSheet<TerritoryType>(ClientLanguage.French);
         var flagSheet = data.GetExcelSheet<AetherCurrentCompFlgSet>();
 
         foreach ((uint territoryId, ushort[] questIds) in QuestIdsByTerritory)
         {
             TerritoryType territory = territorySheetEnglish.GetRow(territoryId);
             TerritoryType territoryJapanese = territorySheetJapanese.GetRow(territoryId);
+            TerritoryType territoryGerman = territorySheetGerman.GetRow(territoryId);
+            TerritoryType territoryFrench = territorySheetFrench.GetRow(territoryId);
             HashSet<uint> validFieldIds = [];
             if (territory.AetherCurrentCompFlgSet.RowId > 0)
             {
@@ -223,7 +234,13 @@ internal sealed class AetherCurrentDataService
             string japaneseName = territoryJapanese.PlaceName.ValueNullable?.Name.ToString()
                                   ?? territoryJapanese.PlaceNameZone.ValueNullable?.Name.ToString()
                                   ?? englishName;
-            result[territoryId] = new(territoryId, englishName, japaneseName, territory.ExVersion.RowId,
+            string germanName = territoryGerman.PlaceName.ValueNullable?.Name.ToString()
+                                ?? territoryGerman.PlaceNameZone.ValueNullable?.Name.ToString()
+                                ?? englishName;
+            string frenchName = territoryFrench.PlaceName.ValueNullable?.Name.ToString()
+                                ?? territoryFrench.PlaceNameZone.ValueNullable?.Name.ToString()
+                                ?? englishName;
+            result[territoryId] = new(territoryId, englishName, japaneseName, germanName, frenchName, territory.ExVersion.RowId,
                 fieldCurrents, questIds);
         }
 

@@ -17,11 +17,19 @@ internal sealed record TerritoryProgress(
     uint TerritoryId,
     string EnglishName,
     string JapaneseName,
+    string GermanName,
+    string FrenchName,
     uint ExpansionId,
     IReadOnlyList<FieldCurrent> FieldCurrents,
     IReadOnlyList<ushort> QuestIds)
 {
-    public string Name => L.IsJapanese ? JapaneseName : EnglishName;
+    public string Name => L.Code switch
+    {
+        "ja" => JapaneseName,
+        "de" => GermanName,
+        "fr" => FrenchName,
+        _ => EnglishName,
+    };
 }
 
 internal sealed record TerritoryMapInfo(Map Map, string? TexturePath);

@@ -1,11 +1,16 @@
 using Dalamud.Configuration;
+using Dalamud.Game;
+using Newtonsoft.Json;
 
 namespace AetherCurrentUnlocker;
 
 public sealed class Configuration : IPluginConfiguration
 {
-    public int Version { get; set; } = 3;
-    public DisplayLanguage? DisplayLanguage { get; set; }
+    public int Version { get; set; } = 4;
+    public string? Language { get; set; }
+
+    [JsonProperty("DisplayLanguage")]
+    public DisplayLanguage? LegacyDisplayLanguage { get; set; }
     public Dictionary<ulong, CharacterConfiguration> Characters { get; set; } = [];
 
     // Version 1 migration defaults. These remain readable for existing installations.
@@ -29,26 +34,40 @@ public sealed class Configuration : IPluginConfiguration
             ShowDebugInformation = DebugMode,
         };
         Characters[contentId] = character;
-        Version = 3;
+        Version = 4;
         return character;
     }
 
-    public bool Migrate(Dalamud.Game.ClientLanguage? clientLanguage)
+    public bool Migrate(ClientLanguage? gameLanguage, string? dalamudUiLanguage)
     {
         bool changed = false;
-        DisplayLanguage resolved = L.ResolveInitial(DisplayLanguage, clientLanguage);
-        if (DisplayLanguage != resolved)
+        string? normalized = L.NormalizeLanguageCode(Language);
+        if (normalized == null)
+            normalized = LegacyDisplayLanguage switch
+            {
+                DisplayLanguage.English => "en",
+                DisplayLanguage.Japanese => "ja",
+                _ => L.ResolveInitial(gameLanguage, dalamudUiLanguage),
+            };
+        if (!string.Equals(Language, normalized, StringComparison.Ordinal))
         {
-            DisplayLanguage = resolved;
+            Language = normalized;
             changed = true;
         }
-        if (Version < 3)
+        if (LegacyDisplayLanguage != null)
         {
-            Version = 3;
+            LegacyDisplayLanguage = null;
+            changed = true;
+        }
+        if (Version < 4)
+        {
+            Version = 4;
             changed = true;
         }
         return changed;
     }
+
+    public bool ShouldSerializeLegacyDisplayLanguage() => false;
 }
 
 public sealed class CharacterConfiguration

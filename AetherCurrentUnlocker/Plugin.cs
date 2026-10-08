@@ -40,9 +40,9 @@ public sealed class Plugin : IDalamudPlugin
         try { detectedLanguage = clientState.ClientLanguage; }
         catch { detectedLanguage = null; }
         L.VerifyResolution();
-        if (config.Migrate(detectedLanguage))
+        if (config.Migrate(detectedLanguage, pluginInterface.UiLanguage))
             pluginInterface.SavePluginConfig(config);
-        L.Configure(() => config.DisplayLanguage);
+        L.Configure(() => config.Language);
 
         VNavmeshIpc vnav = new(pluginInterface);
         QuestionableIpc questionable = new(pluginInterface);

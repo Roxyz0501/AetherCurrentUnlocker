@@ -10,6 +10,11 @@ $outputDirectory = Join-Path $pluginRoot 'AetherCurrentUnlocker\bin\Release\Aeth
 $latestZip = Join-Path $outputDirectory 'latest.zip'
 $artifactDirectory = Join-Path $pluginRoot 'artifacts'
 
+& (Join-Path $PSScriptRoot 'Test-Localization.ps1')
+if ($LASTEXITCODE -ne 0) {
+    throw "Localization checks failed with exit code $LASTEXITCODE."
+}
+
 [xml]$projectXml = Get-Content -LiteralPath $project -Raw
 $version = [string]$projectXml.Project.PropertyGroup.Version
 $assemblyName = [string]$projectXml.Project.PropertyGroup.AssemblyName
