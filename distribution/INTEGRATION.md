@@ -7,10 +7,10 @@ It is not a standalone `repo.json`.
 
 - InternalName: `AetherCurrentUnlocker`
 - Name: `Aether Current Navigator`
-- AssemblyVersion: `1.0.0.0`
+- AssemblyVersion: `1.0.0.1`
 - DalamudApiLevel: `15`
 - Author: `Roxyz0501`
-- Release ZIP: `AetherCurrentUnlocker-1.0.0.0.zip`
+- Release ZIP: `AetherCurrentUnlocker-1.0.0.1.zip`
 - License: `AGPL-3.0-only`
 - Dependencies:
   - `vnavmesh`: required for field travel and routing.
@@ -20,7 +20,7 @@ It is not a standalone `repo.json`.
 ## Published values
 
 - Source repository: `https://github.com/Roxyz0501/AetherCurrentUnlocker`
-- Release ZIP: `https://github.com/Roxyz0501/AetherCurrentUnlocker/releases/download/v1.0.0.0/AetherCurrentUnlocker-1.0.0.0.zip`
+- Release ZIP: `https://github.com/Roxyz0501/AetherCurrentUnlocker/releases/download/v1.0.0.1/AetherCurrentUnlocker-1.0.0.1.zip`
 - Icon: `https://raw.githubusercontent.com/Roxyz0501/AetherCurrentUnlocker/main/AetherCurrentUnlocker/images/icon.png`
 
 Use the same release asset URL for `DownloadLinkInstall` and `DownloadLinkUpdate`. The published object is

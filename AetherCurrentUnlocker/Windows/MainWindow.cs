@@ -221,26 +221,14 @@ internal sealed class MainWindow
                 ImGui.EndTabItem();
             }
 
-            if (ImGui.BeginTabItem($"{L.T("Language settings", "言語設定")}###LanguageSettings"))
-            {
-                DrawLanguageSettings();
-                ImGui.EndTabItem();
-            }
-
-            StandardPluginTabs.PushSupportTabStyle();
-            bool supportOpen = ImGui.BeginTabItem($"{L.T("Support", "支援")}###Support");
-            StandardPluginTabs.PopSupportTabStyle();
-            if (supportOpen)
-            {
-                DrawSupport();
-                ImGui.EndTabItem();
-            }
-
-            if (ImGui.BeginTabItem($"{L.T("Config", "設定")}###Config"))
-            {
-                DrawConfig();
-                ImGui.EndTabItem();
-            }
+            StandardPluginTabs.DrawStandardTrailingTabs(
+                L.T("Config", "設定"),
+                "Config",
+                DrawConfig,
+                L.T("Language settings", "言語設定"),
+                DrawLanguageSettings,
+                L.T("Support", "支援"),
+                DrawSupport);
             ImGui.EndTabBar();
         }
     }

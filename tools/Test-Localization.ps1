@@ -31,8 +31,15 @@ if (Test-Path -LiteralPath $canonicalTabs) {
     if ($pluginHash -ne $canonicalHash) { throw 'StandardPluginTabs.cs differs from the canonical workspace template.' }
 }
 $windowSource = Get-Content -LiteralPath (Join-Path $root 'AetherCurrentUnlocker\Windows\MainWindow.cs') -Raw
-foreach ($required in @('###LanguageSettings', '###Support', 'StandardPluginTabs.DrawLanguageSelector', 'StandardPluginTabs.DrawSupportContent')) {
+foreach ($required in @('StandardPluginTabs.DrawStandardTrailingTabs', 'StandardPluginTabs.DrawLanguageSelector', 'StandardPluginTabs.DrawSupportContent')) {
     if (-not $windowSource.Contains($required)) { throw "Required shared-tab integration is missing: $required" }
+}
+$sharedTabsSource = Get-Content -LiteralPath $sharedTabs -Raw
+$settingsPosition = $sharedTabsSource.IndexOf('{settingsLabel}###{settingsStableId}')
+$languagePosition = $sharedTabsSource.IndexOf('{languageSettingsLabel}###LanguageSettings')
+$supportPosition = $sharedTabsSource.IndexOf('{supportLabel}###Support')
+if ($settingsPosition -lt 0 -or $languagePosition -le $settingsPosition -or $supportPosition -le $languagePosition) {
+    throw 'Shared trailing tabs must be ordered Settings, Language settings, Support.'
 }
 
 dotnet run --project (Join-Path $root 'AetherCurrentUnlocker.LocalizationTests\AetherCurrentUnlocker.LocalizationTests.csproj') -c Release
