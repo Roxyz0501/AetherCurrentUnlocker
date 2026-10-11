@@ -23,6 +23,18 @@ foreach ($sample in @('日本語', 'Français', '한국어', '简体中文', '�
     if (-not ($catalog + $languageSource).Contains($sample)) { throw "Required glyph sample is missing: $sample" }
 }
 
+$sharedTabs = Join-Path $root 'AetherCurrentUnlocker\Windows\StandardPluginTabs.cs'
+$canonicalTabs = Join-Path $root '..\templates\Dalamud\StandardPluginTabs.cs'
+if (Test-Path -LiteralPath $canonicalTabs) {
+    $pluginHash = (Get-FileHash -LiteralPath $sharedTabs -Algorithm SHA256).Hash
+    $canonicalHash = (Get-FileHash -LiteralPath $canonicalTabs -Algorithm SHA256).Hash
+    if ($pluginHash -ne $canonicalHash) { throw 'StandardPluginTabs.cs differs from the canonical workspace template.' }
+}
+$windowSource = Get-Content -LiteralPath (Join-Path $root 'AetherCurrentUnlocker\Windows\MainWindow.cs') -Raw
+foreach ($required in @('###LanguageSettings', '###Support', 'StandardPluginTabs.DrawLanguageSelector', 'StandardPluginTabs.DrawSupportContent')) {
+    if (-not $windowSource.Contains($required)) { throw "Required shared-tab integration is missing: $required" }
+}
+
 dotnet run --project (Join-Path $root 'AetherCurrentUnlocker.LocalizationTests\AetherCurrentUnlocker.LocalizationTests.csproj') -c Release
 if ($LASTEXITCODE -ne 0) { throw "Localization test executable failed with exit code $LASTEXITCODE." }
 Write-Output "Static coverage passed: $($staticKeys.Count) literals and $($formatKeys.Count) format keys."

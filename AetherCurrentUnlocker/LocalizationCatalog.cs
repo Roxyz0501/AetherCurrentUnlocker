@@ -97,6 +97,7 @@ internal static class LocalizationCatalog
         A("Status", "Status", "État", "상태", "状态", "狀態");
         A("Support", "Unterstützen", "Soutien", "후원", "支持", "支援");
         A("Config", "Einstellungen", "Configuration", "설정", "设置", "設定");
+        A("Language settings", "Sprache", "Langue", "언어 설정", "语言设置", "語言設定");
         A("Unlock current area  ▶", "Aktuelles Gebiet freischalten  ▶", "Débloquer la zone actuelle  ▶", "현재 지역 해금  ▶", "解锁当前区域  ▶", "解鎖目前區域  ▶");
         A("Unlock selected expansion  ▶", "Ausgewählte Erweiterung freischalten  ▶", "Débloquer l'extension choisie  ▶", "선택한 확장팩 모두 해금  ▶", "解锁所选资料片  ▶", "解鎖所選資料片  ▶");
         A("Select an expansion", "Erweiterung auswählen", "Choisir une extension", "확장팩 선택", "选择资料片", "選擇資料片");

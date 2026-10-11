@@ -29,7 +29,7 @@ documented in `README.md` and `NOTICE.md` still apply to every public release.
 
 - [ ] Build with `tools/Build-Release.ps1` and verify its reported SHA-256.
 - [ ] Confirm all seven language choices, first-launch game/Dalamud priority, English fallback, immediate switching, glyph coverage, and persistence in game.
-- [ ] Create an individual GitHub Release tagged for `0.4.0.0` and attach `AetherCurrentUnlocker-0.4.0.0.zip`.
+- [ ] Create an individual GitHub Release tagged for `1.0.0.0` and attach `AetherCurrentUnlocker-1.0.0.0.zip`.
 - [ ] Replace all placeholders in `distribution/plugin-metadata.template.json`.
 - [ ] Add the resulting one-entry object to the Roxyz0501 shared custom repository.
 - [ ] Validate clean install and update from the published shared `repo.json`.

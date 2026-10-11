@@ -10,6 +10,7 @@ using Dalamud.Interface.Utility;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using Dalamud.Utility;
+using Roxyz0501.Dalamud.CommonUi;
 
 namespace AetherCurrentUnlocker.Windows;
 
@@ -220,12 +221,15 @@ internal sealed class MainWindow
                 ImGui.EndTabItem();
             }
 
-            ImGui.PushStyleColor(ImGuiCol.Tab, new Vector4(0.55f, 0.34f, 0.05f, 1f));
-            ImGui.PushStyleColor(ImGuiCol.TabHovered, new Vector4(0.95f, 0.58f, 0.08f, 1f));
-            ImGui.PushStyleColor(ImGuiCol.TabActive, new Vector4(0.82f, 0.47f, 0.05f, 1f));
-            ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(1f, 0.95f, 0.82f, 1f));
+            if (ImGui.BeginTabItem($"{L.T("Language settings", "言語設定")}###LanguageSettings"))
+            {
+                DrawLanguageSettings();
+                ImGui.EndTabItem();
+            }
+
+            StandardPluginTabs.PushSupportTabStyle();
             bool supportOpen = ImGui.BeginTabItem($"{L.T("Support", "支援")}###Support");
-            ImGui.PopStyleColor(4);
+            StandardPluginTabs.PopSupportTabStyle();
             if (supportOpen)
             {
                 DrawSupport();
@@ -243,54 +247,34 @@ internal sealed class MainWindow
 
     private static void DrawSupport()
     {
-        const string supportUrl = "https://ko-fi.com/roxyz0501";
-        ImGui.Spacing();
-        ImGui.TextColored(new Vector4(1f, 0.7f, 0.18f, 1f), L.T("Support Roxyz0501's development", "Roxyz0501の開発を支援"));
-        ImGui.Spacing();
-        ImGui.TextWrapped(L.T(
-            "You may optionally support development of Aether Current Navigator. Every feature remains available without a contribution.",
-            "Aether Current Navigatorの開発を任意で支援できます。支援しなくても、すべての機能を利用できます。"));
-        ImGui.TextWrapped(L.T("Recipient: Roxyz0501", "支援先: Roxyz0501"));
-        ImGui.TextDisabled(supportUrl);
-        ImGui.Spacing();
+        StandardPluginTabs.DrawSupportContent(
+            L.T("Support Roxyz0501's development", "Roxyz0501の開発を支援"),
+            L.T("You may optionally support development of Aether Current Navigator. Every feature remains available without a contribution.",
+                "Aether Current Navigatorの開発を任意で支援できます。支援しなくても、すべての機能を利用できます。"),
+            L.T("Recipient: Roxyz0501", "支援先: Roxyz0501"),
+            L.T("Support Roxyz0501 on Ko-fi", "Ko-fiでRoxyz0501を支援"));
+    }
 
-        ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0.78f, 0.39f, 0.05f, 1f));
-        ImGui.PushStyleColor(ImGuiCol.ButtonHovered, new Vector4(0.95f, 0.52f, 0.08f, 1f));
-        ImGui.PushStyleColor(ImGuiCol.ButtonActive, new Vector4(0.68f, 0.31f, 0.03f, 1f));
-        string supportLabel = L.T("Support Roxyz0501 on Ko-fi", "Ko-fiでRoxyz0501を支援");
-        float supportWidth = MathF.Min(ImGui.GetContentRegionAvail().X,
-            MathF.Max(300f, ImGui.CalcTextSize(supportLabel).X + ImGui.GetStyle().FramePadding.X * 4f));
-        bool clicked = ImGui.Button($"{supportLabel}###KoFiSupport", new Vector2(supportWidth, 46));
-        ImGui.PopStyleColor(3);
-        if (clicked)
-            Util.OpenLink(supportUrl);
+    private void DrawLanguageSettings()
+    {
+        string language = L.NormalizeLanguageCode(config.Language) ?? "en";
+        string? selectedLanguage = StandardPluginTabs.DrawLanguageSelector(
+            L.T("Display language", "表示言語"),
+            L.T("Selected automatically from the game language on first launch, then kept until you change it.",
+                "初回起動時のみゲーム言語から選択し、以後は変更するまで固定されます。"), language);
+        if (selectedLanguage != null)
+        {
+            config.Language = selectedLanguage;
+            questStatusCache.Clear();
+            aetheryteMapCache.Clear();
+            mountCache = default;
+            save();
+            languageChanged();
+        }
     }
 
     private void DrawConfig()
     {
-        string language = L.NormalizeLanguageCode(config.Language) ?? "en";
-        string languageName = L.LanguageName(language);
-        ImGui.SetNextItemWidth(180);
-        if (ImGui.BeginCombo($"{L.T("Display language", "表示言語")}###DisplayLanguage", languageName))
-        {
-            foreach (string choice in L.SupportedCodes)
-            {
-                string choiceName = L.LanguageName(choice);
-                if (!ImGui.Selectable(choiceName, language == choice))
-                    continue;
-                config.Language = choice;
-                questStatusCache.Clear();
-                aetheryteMapCache.Clear();
-                mountCache = default;
-                save();
-                languageChanged();
-            }
-            ImGui.EndCombo();
-        }
-        ImGui.TextDisabled(L.T(
-            "Selected automatically from the game language on first launch, then kept until you change it.",
-            "初回起動時のみゲーム言語から選択し、以後は変更するまで固定されます。"));
-
         CharacterConfiguration settings = Settings;
         string characterName = playerState.IsLoaded ? playerState.CharacterName.ToString() : L.T("logged-in character", "ログイン中のキャラクター");
         ImGui.TextDisabled(L.F("ui.characterSettings", characterName));
