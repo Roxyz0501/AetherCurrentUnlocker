@@ -16,6 +16,11 @@ namespace AetherCurrentUnlocker.Windows;
 
 internal sealed class MainWindow
 {
+    private readonly StandardPluginInfo dependencyInfo = new(
+        new("vnavmesh", "vnavmesh", true, new("Ground navigation", "地上経路探索", "Bodennavigation", "Navigation terrestre", "지상 경로 탐색", "地面寻路", "地面尋路")),
+        new("Questionable", "Questionable", false, new("Aether Current quests", "風脈クエスト", "Windäther-Quests", "Quêtes des courants éthérés", "풍맥 퀘스트", "风脉任务", "風脈任務")),
+        new("TextAdvance", "TextAdvance", false, new("Required by Questionable", "Questionableの前提", "Von Questionable benötigt", "Requis par Questionable", "Questionable에 필요", "Questionable所需", "Questionable所需")),
+        new("Lifestream", "Lifestream", false, new("Required by Questionable", "Questionableの前提", "Von Questionable benötigt", "Requis par Questionable", "Questionable에 필요", "Questionable所需", "Questionable所需")));
     private static readonly Vector4 Green = new(0.35f, 0.9f, 0.45f, 1f);
     private static readonly Vector4 Yellow = new(1f, 0.78f, 0.25f, 1f);
     private static readonly Vector4 Red = new(1f, 0.38f, 0.38f, 1f);
@@ -228,7 +233,9 @@ internal sealed class MainWindow
                 L.T("Language settings", "言語設定"),
                 DrawLanguageSettings,
                 L.T("Support", "支援"),
-                DrawSupport);
+                DrawSupport,
+                StandardPluginInfo.Title(config.Language ?? "en"),
+                () => dependencyInfo.Draw(pluginInterface, config.Language ?? "en"));
             ImGui.EndTabBar();
         }
     }
